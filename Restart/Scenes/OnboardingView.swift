@@ -11,13 +11,17 @@ struct OnboardingView: View {
     @AppStorage("onboarding") var isOnboardingIsActive = true
     @State private var buttonOffet: CGFloat = 0
     @State private var buttonWidth = UIScreen.main.bounds.width - 40
-
+    @State private var isAnimating = false
+    
     var body: some View {
         ZStack {
             Color("ColorBlue").ignoresSafeArea()
             VStack(spacing: 20) {
                 // MARK: - Header Section
                 HeaderView() //: HEADER
+                    .opacity(isAnimating ? 1 : 0)
+                    .offset(y: isAnimating ? 0 : -40)
+                    .animation(.easeOut(duration: 1), value: isAnimating)
                 Spacer()
                 
                 // MARK: - Center Section
@@ -43,7 +47,7 @@ struct OnboardingView: View {
                         .foregroundColor(.white)
                         .offset(x: 20)
                     
-                        
+                    
                     //3.Capsule
                     
                     HStack{
@@ -65,18 +69,22 @@ struct OnboardingView: View {
                             .frame(width: 80, height: 80, alignment: .center)
                             .offset(x: buttonOffet)
                             .gesture(
-                                DragGesture().onChanged({ gesture in
-                                    if gesture.translation.width > 0 && gesture.translation.width <= buttonWidth - 80 {
-                                    buttonOffet = gesture.translation.width
-                                    print("ashwani \(buttonOffet)")
-                                    }
-                                })
+                                DragGesture()
+                                    .onChanged({ gesture in
+                                        if gesture.translation.width > 0 && gesture.translation.width <= buttonWidth - 80 {
+                                            buttonOffet = gesture.translation.width
+                                            print("ashwani \(buttonOffet)")
+                                        }
+                                    })
                                     .onEnded({ gesture in
                                         if gesture.translation.width < buttonWidth / 2 {
                                             buttonOffet = 0
                                         } else {
                                             buttonOffet = buttonWidth - 80
-                                            isOnboardingIsActive = false
+                                            withAnimation {
+                                                isOnboardingIsActive = false
+                                            }
+                                           
                                         }
                                     })
                             )
@@ -88,6 +96,9 @@ struct OnboardingView: View {
                 
             } //: VSTACK
         } //: ZSTACK
+        .onAppear {
+            isAnimating = true
+        }
     }
 }
 
@@ -119,12 +130,18 @@ how much love we put into giving
 }
 
 struct HomeCenterView: View {
+    @State private var isAnimating = false
     var body: some View {
         ZStack {
             CircleGroupView(shapeColor: .white, shapeOpacity: 0.2)
             Image("character-1")
                 .resizable()
                 .scaledToFit()
+                //.opacity(isAnimating ? 1 : 0)
+                .animation(.easeOut(duration: 1), value: isAnimating)
+        }
+        .onAppear {
+            isAnimating = true
         }
     }
 }
