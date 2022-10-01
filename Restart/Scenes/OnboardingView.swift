@@ -9,38 +9,19 @@ import SwiftUI
 
 struct OnboardingView: View {
     @AppStorage("onboarding") var isOnboardingIsActive = true
+    @State private var buttonOffet: CGFloat = 0
+    @State private var buttonWidth = UIScreen.main.bounds.width - 40
 
     var body: some View {
         ZStack {
             Color("ColorBlue").ignoresSafeArea()
             VStack(spacing: 20) {
                 // MARK: - Header Section
-                VStack {
-                    Text("Share.")
-                        .font(.system(size: 60))
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                    
-                    Text("""
-                    It's not how much we give but
-                    how much love we put into giving
-                    """)
-                        .font(.title3)
-                        .fontWeight(.light)
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 10.0)
-                } //: HEADER
+                HeaderView() //: HEADER
                 Spacer()
                 
                 // MARK: - Center Section
-                
-                ZStack {
-                    CircleGroupView(shapeColor: .white, shapeOpacity: 0.2)
-                    Image("character-1")
-                        .resizable()
-                        .scaledToFit()
-                } //: CENTER
+                HomeCenterView() //: CENTER
                 
                 Spacer()
                 
@@ -66,7 +47,7 @@ struct OnboardingView: View {
                     //3.Capsule
                     
                     HStack{
-                        Capsule().fill(Color("ColorRed")).frame(width: 80, alignment: .center)
+                        Capsule().fill(Color("ColorRed")).frame(width: buttonOffet + 80, alignment: .center)
                         Spacer()
                     }
                     //4. Circle (dragable)
@@ -82,9 +63,23 @@ struct OnboardingView: View {
                                 .font(.system(size: 24,weight: .bold))
                         }.foregroundColor(.white)
                             .frame(width: 80, height: 80, alignment: .center)
-                            .onTapGesture {
-                                isOnboardingIsActive = false
-                            }
+                            .offset(x: buttonOffet)
+                            .gesture(
+                                DragGesture().onChanged({ gesture in
+                                    if gesture.translation.width > 0 && gesture.translation.width <= buttonWidth - 80 {
+                                    buttonOffet = gesture.translation.width
+                                    print("ashwani \(buttonOffet)")
+                                    }
+                                })
+                                    .onEnded({ gesture in
+                                        if gesture.translation.width < buttonWidth / 2 {
+                                            buttonOffet = 0
+                                        } else {
+                                            buttonOffet = buttonWidth - 80
+                                            isOnboardingIsActive = false
+                                        }
+                                    })
+                            )
                         Spacer()
                     }
                     
@@ -99,5 +94,37 @@ struct OnboardingView: View {
 struct OnboardingView_Previews: PreviewProvider {
     static var previews: some View {
         OnboardingView()
+    }
+}
+
+struct HeaderView: View {
+    var body: some View {
+        VStack {
+            Text("Share.")
+                .font(.system(size: 60))
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+            
+            Text("""
+It's not how much we give but
+how much love we put into giving
+""")
+                .font(.title3)
+                .fontWeight(.light)
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 10.0)
+        }
+    }
+}
+
+struct HomeCenterView: View {
+    var body: some View {
+        ZStack {
+            CircleGroupView(shapeColor: .white, shapeOpacity: 0.2)
+            Image("character-1")
+                .resizable()
+                .scaledToFit()
+        }
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @AppStorage("onboarding") var isOnboardingIsActive = false
-
+    
     var body: some View {
         VStack(spacing: 20) {
             // MARK: - Header
@@ -20,7 +20,7 @@ struct HomeView: View {
                 Image("character-2")
                     .resizable()
                     .scaledToFit()
-                .padding()
+                    .padding()
             }
             
             Text("The time leads to mastery is dependent on the intensity of our focus.")
@@ -38,10 +38,10 @@ struct HomeView: View {
                 Text("Restart")
                     .font(.system(.title3,design: .rounded))
                     .fontWeight(.bold)
-                    
-            }.buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
-
+                
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
         }
     }
 }
