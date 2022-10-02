@@ -11,6 +11,8 @@ struct OnboardingView: View {
     @AppStorage("onboarding") var isOnboardingIsActive = true
     @State private var buttonOffet: CGFloat = 0
     @State private var buttonWidth = UIScreen.main.bounds.width - 40
+    @State private var isAnimating = false
+    var hapticGenerator = UINotificationFeedbackGenerator()
 
     var body: some View {
         ZStack {
@@ -18,6 +20,9 @@ struct OnboardingView: View {
             VStack(spacing: 20) {
                 // MARK: - Header Section
                 HeaderView() //: HEADER
+                    .opacity(isAnimating ? 1 : 0)
+                    .offset(y: isAnimating ? 0 : -40)
+                    .animation(.easeOut(duration: 1), value: isAnimating)
                 Spacer()
                 
                 // MARK: - Center Section
@@ -43,7 +48,7 @@ struct OnboardingView: View {
                         .foregroundColor(.white)
                         .offset(x: 20)
                     
-                        
+                    
                     //3.Capsule
                     
                     HStack{
@@ -65,18 +70,24 @@ struct OnboardingView: View {
                             .frame(width: 80, height: 80, alignment: .center)
                             .offset(x: buttonOffet)
                             .gesture(
-                                DragGesture().onChanged({ gesture in
-                                    if gesture.translation.width > 0 && gesture.translation.width <= buttonWidth - 80 {
-                                    buttonOffet = gesture.translation.width
-                                    print("ashwani \(buttonOffet)")
-                                    }
-                                })
+                                DragGesture()
+                                    .onChanged({ gesture in
+                                        if gesture.translation.width > 0 && gesture.translation.width <= buttonWidth - 80 {
+                                            buttonOffet = gesture.translation.width
+                                            print("ashwani \(buttonOffet)")
+                                        }
+                                    })
                                     .onEnded({ gesture in
                                         if gesture.translation.width < buttonWidth / 2 {
                                             buttonOffet = 0
                                         } else {
                                             buttonOffet = buttonWidth - 80
-                                            isOnboardingIsActive = false
+                                            withAnimation {
+                                                hapticGenerator.notificationOccurred(.success)
+                                                isOnboardingIsActive = false
+                                                playAudio(sound: "chimeup", type: "mp3")
+                                            }
+                                           
                                         }
                                     })
                             )
@@ -88,6 +99,9 @@ struct OnboardingView: View {
                 
             } //: VSTACK
         } //: ZSTACK
+        .onAppear {
+            isAnimating = true
+        }
     }
 }
 
@@ -119,12 +133,41 @@ how much love we put into giving
 }
 
 struct HomeCenterView: View {
+    @State private var isAnimating = false
+    @State private var imageOffset: CGSize = .zero
     var body: some View {
         ZStack {
             CircleGroupView(shapeColor: .white, shapeOpacity: 0.2)
+                .offset(x: imageOffset.width * -1)
+                .blur(radius: abs(imageOffset.width / 5))
+                .animation(.easeOut(duration: 1), value: imageOffset)
             Image("character-1")
                 .resizable()
                 .scaledToFit()
+                .animation(.easeOut(duration: 1), value: isAnimating)
+            
+                .offset(x: imageOffset.width * 1.2)
+                .rotationEffect(.degrees(Double(imageOffset.width / 20)))
+                .gesture(
+                DragGesture()
+                    .onChanged({ gesture in
+                        print(gesture.translation
+                        )
+                        if gesture.translation.width <= 150 && gesture.translation.width >= -150 {
+                            imageOffset = gesture.translation
+                        }
+                        
+                    })
+                    .onEnded({ _ in
+                        withAnimation {
+                            imageOffset = .zero
+                        }
+                       
+                    })
+                )
+        }
+        .onAppear {
+            isAnimating = true
         }
     }
 }
