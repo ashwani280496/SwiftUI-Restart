@@ -10,6 +10,8 @@ import SwiftUI
 struct HomeView: View {
     @AppStorage("onboarding") var isOnboardingIsActive = false
     @State private var isAnimating = false
+    var hapticGenerator = UINotificationFeedbackGenerator()
+
 
     var body: some View {
         VStack(spacing: 20) {
@@ -36,6 +38,8 @@ struct HomeView: View {
             
             Button {
                 withAnimation {
+                    hapticGenerator.notificationOccurred(.warning)
+                    playAudio(sound: "success", type: "m4a")
                     isOnboardingIsActive = true
                 }
             } label: {

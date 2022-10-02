@@ -12,7 +12,8 @@ struct OnboardingView: View {
     @State private var buttonOffet: CGFloat = 0
     @State private var buttonWidth = UIScreen.main.bounds.width - 40
     @State private var isAnimating = false
-    
+    var hapticGenerator = UINotificationFeedbackGenerator()
+
     var body: some View {
         ZStack {
             Color("ColorBlue").ignoresSafeArea()
@@ -82,7 +83,9 @@ struct OnboardingView: View {
                                         } else {
                                             buttonOffet = buttonWidth - 80
                                             withAnimation {
+                                                hapticGenerator.notificationOccurred(.success)
                                                 isOnboardingIsActive = false
+                                                playAudio(sound: "chimeup", type: "mp3")
                                             }
                                            
                                         }
@@ -131,14 +134,37 @@ how much love we put into giving
 
 struct HomeCenterView: View {
     @State private var isAnimating = false
+    @State private var imageOffset: CGSize = .zero
     var body: some View {
         ZStack {
             CircleGroupView(shapeColor: .white, shapeOpacity: 0.2)
+                .offset(x: imageOffset.width * -1)
+                .blur(radius: abs(imageOffset.width / 5))
+                .animation(.easeOut(duration: 1), value: imageOffset)
             Image("character-1")
                 .resizable()
                 .scaledToFit()
-                //.opacity(isAnimating ? 1 : 0)
                 .animation(.easeOut(duration: 1), value: isAnimating)
+            
+                .offset(x: imageOffset.width * 1.2)
+                .rotationEffect(.degrees(Double(imageOffset.width / 20)))
+                .gesture(
+                DragGesture()
+                    .onChanged({ gesture in
+                        print(gesture.translation
+                        )
+                        if gesture.translation.width <= 150 && gesture.translation.width >= -150 {
+                            imageOffset = gesture.translation
+                        }
+                        
+                    })
+                    .onEnded({ _ in
+                        withAnimation {
+                            imageOffset = .zero
+                        }
+                       
+                    })
+                )
         }
         .onAppear {
             isAnimating = true
